@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class UIManager : Singleton<UIManager>
 {
-    // Start is called before the first frame update
+    [SerializeField] GameObject _homeScreen;
     void Start()
     {
-        
+        GameManager.Instance.OnGameSceneChanged += ToggleHomeScreen;
     }
 
     public void OnOptionsClick()
     {
-        GameManager.Instance.LoadLevel(GameManager.GameState.Viewer);
+        GameManager.Instance.LoadLevel(GameManager.GameScene.Viewer);
+        Debug.Log("On Options Click");
+    }
+
+    void ToggleHomeScreen()
+    {
+        _homeScreen.SetActive(GameManager.Instance.CurrentGameScene == GameManager.GameScene.Home);
     }
 }
