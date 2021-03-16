@@ -13,11 +13,15 @@ public class UIManager : Singleton<UIManager>
     public void OnOptionsClick()
     {
         GameManager.Instance.LoadLevel(GameManager.GameScene.Viewer);
-        Debug.Log("On Options Click");
     }
 
     void ToggleHomeScreen()
     {
         _homeScreen.SetActive(GameManager.Instance.CurrentGameScene == GameManager.GameScene.Home);
+    }
+
+    public void onBrowse()
+    {
+        StartCoroutine(GameManager.Instance.DisplayLoadCoroutine());
     }
 }

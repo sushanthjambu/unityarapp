@@ -1,8 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SimpleFileBrowser;
+using Dummiesman;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -16,6 +19,8 @@ public class GameManager : Singleton<GameManager>
 
     GameScene _currentGameScene = GameScene.Home;
     GameScene _previousGameScene;
+
+    GameObject _viewerObject;
 
     public GameScene CurrentGameScene
     {
@@ -41,14 +46,9 @@ public class GameManager : Singleton<GameManager>
                 UnloadLevel(_currentGameScene);
             }
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("Current game Scene : " + _currentGameScene);
-        }
     }
 
-    public void LoadLevel(GameScene gameScene)
+    public AsyncOperation LoadLevel(GameScene gameScene)
     {
         if (!SceneManager.GetSceneByName(gameScene.ToString()).isLoaded)
         {
@@ -56,7 +56,7 @@ public class GameManager : Singleton<GameManager>
             if (ao == null)
             {
                 Debug.LogError("[Scene Manager] Unable to load Level " + gameScene.ToString());
-                return;
+                return null;
             }
             
             if (_currentGameScene != gameScene)
@@ -69,7 +69,9 @@ public class GameManager : Singleton<GameManager>
             {
                 OnGameSceneChanged();
             }
-        }        
+            return ao;
+        }
+        return null;
     }
 
     public void UnloadLevel(GameScene gameScene)
@@ -93,6 +95,51 @@ public class GameManager : Singleton<GameManager>
                 OnGameSceneChanged();
             }
         }
-    }   
+    }
+    
+    public IEnumerator DisplayLoadCoroutine()
+    {
+        FileBrowser.SingleClickMode = true;
+
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Import file", "Load");
+
+        if (FileBrowser.Success)
+        {
+            Debug.Log(FileBrowser.Result[0]);
+            LoadObjfromFile(FileBrowser.Result[0]);
+        }
+    }
+
+    void LoadObjfromFile(string sourcePath)
+    {
+        _viewerObject = new OBJLoader().Load(sourcePath);
+        if (_viewerObject != null)
+        {
+            Debug.Log("Object loaded successfully");
+            StartCoroutine(InstantiateLoadedObject());
+        }
+    }
+
+    IEnumerator InstantiateLoadedObject()
+    {
+        AsyncOperation asyncOp = LoadLevel(GameScene.Viewer);
+
+        while (!asyncOp.isDone)
+            yield return null;
+
+        yield return new WaitForEndOfFrame();
+
+        if (_currentGameScene == GameScene.Viewer && SceneManager.GetSceneByName(GameScene.Viewer.ToString()).isLoaded)
+        {
+            Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
+            if (SceneManager.GetActiveScene().name != GameScene.Viewer.ToString())
+            {
+                Debug.Log("Setting Viewer as Active Scene");
+                SceneManager.SetActiveScene(SceneManager.GetSceneByName(GameScene.Viewer.ToString()));
+            }
+            Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
+            Instantiate(_viewerObject, Vector3.zero, Quaternion.identity);
+        }
+    }
 
 }
