@@ -8,6 +8,8 @@ public class UIManager : Singleton<UIManager>
 
     [SerializeField] GameObject _optionsScreen;
 
+    [SerializeField] GameObject _messageWindow;
+
     RectTransform _optionsRectTransform;
 
     bool _isOptionsOpen = false;
@@ -70,5 +72,13 @@ public class UIManager : Singleton<UIManager>
     public void onBrowse()
     {
         StartCoroutine(GameManager.Instance.DisplayLoadCoroutine());
+    }
+
+    public GameObject CreateMessageWindow()
+    {
+        GameObject dynamicCanvas = GameObject.Find("DynamicCanvas");
+        if (dynamicCanvas != null)
+            return (Instantiate(_messageWindow, dynamicCanvas.transform));
+        return null;
     }
 }

@@ -22,6 +22,8 @@ public class GameManager : Singleton<GameManager>
 
     GameObject _viewerObject;
 
+    GameObject _loadingMessage;
+
     public GameScene CurrentGameScene
     {
         get { return _currentGameScene; }
@@ -112,8 +114,20 @@ public class GameManager : Singleton<GameManager>
 
         if (FileBrowser.Success)
         {
+            DisplayLoadingMessage();
             Debug.Log(FileBrowser.Result[0]);
             LoadObjfromFile(FileBrowser.Result[0]);
+        }
+    }
+
+    void DisplayLoadingMessage()
+    {
+        _loadingMessage = UIManager.Instance.CreateMessageWindow();
+        if (_loadingMessage != null)
+        {
+            MessageFields msgFields = _loadingMessage.GetComponent<MessageFields>();
+            msgFields.MessageDetails("Loading...", "Importing selected object and starting AR Scene.");
+            Debug.Log("Loading Message Displayed");
         }
     }
 
@@ -136,6 +150,8 @@ public class GameManager : Singleton<GameManager>
             yield return null;
 
         yield return new WaitForEndOfFrame();
+        if (_loadingMessage != null)
+            Destroy(_loadingMessage);
 
         if (_currentGameScene == GameScene.Viewer && SceneManager.GetSceneByName(GameScene.Viewer.ToString()).isLoaded)
         {

@@ -1943,6 +1943,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _homeScreen: {fileID: 1194769729}
   _optionsScreen: {fileID: 146964728}
+  _messageWindow: {fileID: 6143936211935782471, guid: 6de0802f235ddc34cb5181228e7ff8df, type: 3}
 --- !u!4 &1811639775
 Transform:
   m_ObjectHideFlags: 0
