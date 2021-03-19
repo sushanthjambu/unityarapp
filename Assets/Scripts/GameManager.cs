@@ -39,7 +39,14 @@ public class GameManager : Singleton<GameManager>
         {
             if (_currentGameScene == GameScene.Home)
             {
-                Application.Quit();
+                if (UIManager.Instance.IsOptionsOpen)
+                {
+                    UIManager.Instance.OnOptionsClick();
+                }
+                else
+                {
+                    Application.Quit();
+                }
             }
             else
             {
