@@ -122,12 +122,13 @@ public class GameManager : Singleton<GameManager>
         _viewerObject = new OBJLoader().Load(sourcePath);
         if (_viewerObject != null)
         {
+            _viewerObject.SetActive(false);
             Debug.Log("Object loaded successfully");
-            StartCoroutine(InstantiateLoadedObject());
+            StartCoroutine(LoadedObjectToViewer());
         }
     }
 
-    IEnumerator InstantiateLoadedObject()
+    IEnumerator LoadedObjectToViewer()
     {
         AsyncOperation asyncOp = LoadLevel(GameScene.Viewer);
 
@@ -138,14 +139,14 @@ public class GameManager : Singleton<GameManager>
 
         if (_currentGameScene == GameScene.Viewer && SceneManager.GetSceneByName(GameScene.Viewer.ToString()).isLoaded)
         {
-            Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
+            //Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
             if (SceneManager.GetActiveScene().name != GameScene.Viewer.ToString())
             {
-                Debug.Log("Setting Viewer as Active Scene");
+                //Debug.Log("Setting Viewer as Active Scene");
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(GameScene.Viewer.ToString()));
             }
-            Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
-            Instantiate(_viewerObject, Vector3.zero, Quaternion.identity);
+            //Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
+            ARViewManager.Instance.AssignObject(_viewerObject);
         }
     }
 
