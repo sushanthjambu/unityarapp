@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : Singleton<UIManager>
 {
@@ -80,5 +81,34 @@ public class UIManager : Singleton<UIManager>
         if (dynamicCanvas != null)
             return (Instantiate(_messageWindow, dynamicCanvas.transform));
         return null;
+    }
+
+    public void OnOptionExit()
+    {
+        Application.Quit();
+    }
+
+    public void OnOptionViewer()
+    {
+        GameObject viewerWindow = CreateMessageWindow();
+        if (viewerWindow != null)
+        {
+            MessageFields msgFields = viewerWindow.GetComponent<MessageFields>();
+            msgFields.MessageDetails("AR Viewer", "Click on \"Browse\" and select a 3D file to view in AR", "Browse", "Cancel");
+            Transform browseTrans = viewerWindow.transform.Find("Done");
+            if (browseTrans != null)
+            {
+                Button browse = browseTrans.gameObject.GetComponent<Button>();
+                browse.onClick.AddListener(() => { Destroy(viewerWindow); StartCoroutine(GameManager.Instance.DisplayLoadCoroutine()); });
+            }
+
+            Transform cancelTrans = viewerWindow.transform.Find("Cancel");
+            if(cancelTrans != null)
+            {
+                Button cancel = cancelTrans.gameObject.GetComponent<Button>();
+                cancel.onClick.AddListener(() => Destroy(viewerWindow));
+            }
+        }
+
     }
 }
