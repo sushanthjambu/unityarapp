@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
+using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using SimpleFileBrowser;
@@ -16,6 +17,9 @@ public class GameManager : Singleton<GameManager>
         Viewer,
         Editor
     }
+
+    const string TypeOBJ = ".obj";
+    const string TypeGLTF = ".gltf";
 
     GameScene _currentGameScene = GameScene.Home;
     GameScene _previousGameScene;
@@ -97,6 +101,7 @@ public class GameManager : Singleton<GameManager>
             if (gameScene != GameScene.Home)
             {
                 _currentGameScene = _previousGameScene;
+                Destroy(_viewerObject);
             }
 
             if (OnGameSceneChanged != null)
@@ -133,7 +138,16 @@ public class GameManager : Singleton<GameManager>
 
     void LoadObjfromFile(string sourcePath)
     {
-        _viewerObject = new OBJLoader().Load(sourcePath);
+        string fileName = FileBrowserHelpers.GetFilename(sourcePath).ToLower();
+        if (fileName.EndsWith(TypeOBJ))
+            _viewerObject = new OBJLoader().Load(sourcePath);
+        else
+        {
+            if (_loadingMessage != null)
+                Destroy(_loadingMessage);
+            DisplayFileErrorMessage();
+        }            
+
         if (_viewerObject != null)
         {
             _viewerObject.SetActive(false);
@@ -163,6 +177,22 @@ public class GameManager : Singleton<GameManager>
             }
             //Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
             ARViewManager.Instance.AssignObject(_viewerObject);
+        }
+    }
+
+    void DisplayFileErrorMessage()
+    {
+        GameObject fileErrorMessage = UIManager.Instance.CreateMessageWindow();
+        if (fileErrorMessage != null)
+        {
+            MessageFields msgFields = fileErrorMessage.GetComponent<MessageFields>();
+            msgFields.MessageDetails("File Type Error!", "Selected File type cannot be loaded, please select \".obj\" or \".gltf\" files.", "OK");
+            Transform okTrans = fileErrorMessage.transform.Find("Done");
+            if (okTrans != null)
+            {
+                Button okButton = okTrans.gameObject.GetComponent<Button>();
+                okButton.onClick.AddListener(() => { Destroy(fileErrorMessage); });
+            }
         }
     }
 
