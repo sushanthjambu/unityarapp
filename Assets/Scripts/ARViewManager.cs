@@ -12,6 +12,8 @@ public class ARViewManager : Singleton<ARViewManager>
 
     GameObject _placedObject;
 
+    public bool IsObjectPlaced { get; private set; }
+
     private List<ARRaycastHit> hits = new List<ARRaycastHit>();
 
     public void AssignObject(GameObject importedObject)
@@ -19,6 +21,7 @@ public class ARViewManager : Singleton<ARViewManager>
         if (importedObject != null)
         {
             _placedObject = importedObject;
+            IsObjectPlaced = false;
         }
            
     }
@@ -37,13 +40,14 @@ public class ARViewManager : Singleton<ARViewManager>
 
     private void Update()
     {
-        if (!TryGetTouchPosition(out Vector2 touchPosition) || _placedObject == null)
+        if (!TryGetTouchPosition(out Vector2 touchPosition) || IsObjectPlaced || _placedObject == null)
             return;
 
         if (arRaycastManager.Raycast(touchPosition, hits, TrackableType.PlaneWithinPolygon))
         {
             var hitPose = hits[0].pose;
             Instantiate(_placedObject, hitPose.position, hitPose.rotation).SetActive(true);
+            IsObjectPlaced = true;
         }
 
     }
