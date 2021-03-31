@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using UnityEngine.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using SimpleFileBrowser;
 using Dummiesman;
+using UnityGLTF;
 
 public class GameManager : Singleton<GameManager>
 {
+    [SerializeField]
+    private GLTFImporterUpdated gltfImporter;
+
     public event Action OnGameSceneChanged;
     public enum GameScene
     {
@@ -20,6 +25,7 @@ public class GameManager : Singleton<GameManager>
 
     const string TypeOBJ = ".obj";
     const string TypeGLTF = ".gltf";
+    const string TypeGLB = ".glb";
 
     GameScene _currentGameScene = GameScene.Home;
     GameScene _previousGameScene;
@@ -56,6 +62,8 @@ public class GameManager : Singleton<GameManager>
             }
             else
             {
+                Destroy(_viewerObject);
+                _viewerObject = null;
                 UnloadLevel(_currentGameScene);
             }
         }
@@ -101,7 +109,6 @@ public class GameManager : Singleton<GameManager>
             if (gameScene != GameScene.Home)
             {
                 _currentGameScene = _previousGameScene;
-                Destroy(_viewerObject);
             }
 
             if (OnGameSceneChanged != null)
@@ -138,34 +145,49 @@ public class GameManager : Singleton<GameManager>
 
     void LoadObjfromFile(string sourcePath)
     {
+        bool isInvalidFileType = false;
         string fileName = FileBrowserHelpers.GetFilename(sourcePath).ToLower();
         if (fileName.EndsWith(TypeOBJ))
             _viewerObject = new OBJLoader().Load(sourcePath);
+        else if (fileName.EndsWith(TypeGLTF) || fileName.EndsWith(TypeGLB))
+        {
+            gltfImporter.GLTFUri = sourcePath;
+            GLTFLoaderTask();
+        }            
         else
         {
-            if (_loadingMessage != null)
-                Destroy(_loadingMessage);
+            isInvalidFileType = true;
+            DestroyLoadingMessage();
             DisplayFileErrorMessage();
         }            
 
-        if (_viewerObject != null)
+        if (!isInvalidFileType)
         {
-            _viewerObject.SetActive(false);
-            Debug.Log("Object loaded successfully");
             StartCoroutine(LoadedObjectToViewer());
         }
+        //if (_viewerObject != null)
+        //{
+        //    _viewerObject.SetActive(false);
+        //    Debug.Log("object loaded successfully");
+        //    StartCoroutine(LoadedObjectToViewer());
+        //}
     }
 
     IEnumerator LoadedObjectToViewer()
     {
+        while (_viewerObject == null)
+            yield return null;
+        yield return new WaitForEndOfFrame();
+
+        _viewerObject.SetActive(false);
+
         AsyncOperation asyncOp = LoadLevel(GameScene.Viewer);
 
         while (!asyncOp.isDone)
             yield return null;
 
         yield return new WaitForEndOfFrame();
-        if (_loadingMessage != null)
-            Destroy(_loadingMessage);
+        DestroyLoadingMessage();
 
         if (_currentGameScene == GameScene.Viewer && SceneManager.GetSceneByName(GameScene.Viewer.ToString()).isLoaded)
         {
@@ -178,6 +200,23 @@ public class GameManager : Singleton<GameManager>
             //Debug.Log("Active Scene is : " + SceneManager.GetActiveScene().name);
             ARViewManager.Instance.AssignObject(_viewerObject);
         }
+    }
+
+    async void GLTFLoaderTask()
+    {
+        if (gltfImporter.GLTFUri != null)
+            await gltfImporter.Load();
+    }
+
+    public void GLTFObjectAssignment(GameObject gltfObject)
+    {
+        _viewerObject = gltfObject;
+    }
+
+    public void DestroyLoadingMessage()
+    {
+        if (_loadingMessage != null)
+            Destroy(_loadingMessage);
     }
 
     void DisplayFileErrorMessage()
