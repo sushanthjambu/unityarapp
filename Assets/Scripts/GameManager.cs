@@ -139,7 +139,6 @@ public class GameManager : Singleton<GameManager>
         {
             MessageFields msgFields = _loadingMessage.GetComponent<MessageFields>();
             msgFields.MessageDetails("Loading...", "Importing selected object and starting AR Scene.");
-            Debug.Log("Loading Message Displayed");
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -10,11 +11,19 @@ public class ARViewManager : Singleton<ARViewManager>
     [SerializeField]
     ARRaycastManager arRaycastManager;
 
+    [SerializeField]
+    ARPlaneManager arPlaneManager;
+
+    [SerializeField]
+    ARAnchorManager arAnchorManager;
+
     GameObject _placedObject;
 
     public bool IsObjectPlaced { get; private set; }
 
     private List<ARRaycastHit> hits = new List<ARRaycastHit>();
+
+    public static event Action<GameObject, ARAnchor> OnAnchorAttached;
 
     public void AssignObject(GameObject importedObject)
     {
@@ -46,8 +55,18 @@ public class ARViewManager : Singleton<ARViewManager>
         if (arRaycastManager.Raycast(touchPosition, hits, TrackableType.PlaneWithinPolygon))
         {
             var hitPose = hits[0].pose;
-            Instantiate(_placedObject, hitPose.position, hitPose.rotation).SetActive(true);
+            GameObject instantiatedObject = Instantiate(_placedObject, hitPose.position, hitPose.rotation);
+            instantiatedObject.SetActive(true);
             IsObjectPlaced = true;
+            ARPlane hitPlane = arPlaneManager.GetPlane(hits[0].trackableId);
+            if (hitPlane != null)
+            {
+                Debug.Log("Plane is found");
+                ARAnchor anchor = arAnchorManager.AttachAnchor(hitPlane, hitPose);
+                Debug.Log("Anchor is attached to plane : " + anchor.name);
+                anchor.transform.SetParent(instantiatedObject.transform);
+                OnAnchorAttached?.Invoke(instantiatedObject, anchor);
+            }            
         }
 
     }
