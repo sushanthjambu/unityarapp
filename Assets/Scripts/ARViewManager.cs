@@ -23,8 +23,6 @@ public class ARViewManager : Singleton<ARViewManager>
 
     private List<ARRaycastHit> hits = new List<ARRaycastHit>();
 
-    public static event Action<GameObject, ARAnchor> OnAnchorAttached;
-
     public void AssignObject(GameObject importedObject)
     {
         if (importedObject != null)
@@ -57,6 +55,7 @@ public class ARViewManager : Singleton<ARViewManager>
             var hitPose = hits[0].pose;
             GameObject instantiatedObject = Instantiate(_placedObject, hitPose.position, hitPose.rotation);
             instantiatedObject.SetActive(true);
+            instantiatedObject.AddComponent<ContentScaler>();
             IsObjectPlaced = true;
             ARPlane hitPlane = arPlaneManager.GetPlane(hits[0].trackableId);
             if (hitPlane != null)
@@ -65,7 +64,6 @@ public class ARViewManager : Singleton<ARViewManager>
                 ARAnchor anchor = arAnchorManager.AttachAnchor(hitPlane, hitPose);
                 Debug.Log("Anchor is attached to plane : " + anchor.name);
                 anchor.transform.SetParent(instantiatedObject.transform);
-                OnAnchorAttached?.Invoke(instantiatedObject, anchor);
             }            
         }
 

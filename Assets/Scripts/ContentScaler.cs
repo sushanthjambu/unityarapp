@@ -5,23 +5,16 @@ using UnityEngine.XR.ARFoundation;
 
 public class ContentScaler : MonoBehaviour
 {
-    private float _minScale = 0.1f;
-    private float _maxScale = 30.0f;
+    private Vector3 originalScale;
+    private float _minScale = 1.0f;
+    private float _maxScale = 2000.0f;
+    private float scaleValue = 1.0f;
+    private float speed = 0.3f;
 
-    ARSessionOrigin arSessionOrigin;
-    Transform sessionOriginTransform;
-
-    GameObject spawnedObject;
-    ARAnchor anchor;
-    
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        arSessionOrigin = GetComponent<ARSessionOrigin>();
-        sessionOriginTransform = arSessionOrigin.transform;
-        ARViewManager.OnAnchorAttached += AssignObjectAnchor;
+        originalScale = transform.localScale;
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -42,35 +35,12 @@ public class ContentScaler : MonoBehaviour
             float deltaMagDiff = prevTouchDeltaMag - touchDeltaMag;
             Debug.Log("Delta Mag : " + deltaMagDiff);
 
-            float scaleValue = sessionOriginTransform.localScale.x + (deltaMagDiff / 100.0f);
-            scaleValue = Mathf.Clamp(scaleValue, _minScale, _maxScale);
+            float additiveScale = scaleValue * 100.0f;
+            additiveScale -= deltaMagDiff * speed;
+            scaleValue = Mathf.Clamp(additiveScale, _minScale, _maxScale) / 100.0f;
             Debug.Log("Scale : " + scaleValue);
 
-            sessionOriginTransform.localScale = Vector3.one * scaleValue;
-
-            //AdjustObjectPosition();
-
+            transform.localScale = originalScale * scaleValue;
         }
-    }
-
-    void AssignObjectAnchor(GameObject placedObject, ARAnchor attachedAnchor)
-    {
-        spawnedObject = placedObject;
-        anchor = attachedAnchor;
-    }
-
-    void AdjustObjectPosition()
-    {
-        if(spawnedObject != null && anchor != null)
-        {
-            arSessionOrigin.MakeContentAppearAt(spawnedObject.transform, anchor.transform.position);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        ARViewManager.OnAnchorAttached -= AssignObjectAnchor;
-        spawnedObject = null;
-        anchor = null;
     }
 }
