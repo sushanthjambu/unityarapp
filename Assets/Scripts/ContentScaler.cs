@@ -15,7 +15,7 @@ public class ContentScaler : MonoBehaviour
     {
         originalScale = transform.localScale;
     }
-    // Update is called once per frame
+
     void Update()
     {
         if (!ARViewManager.Instance.IsObjectPlaced)

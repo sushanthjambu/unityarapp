@@ -27,6 +27,8 @@ public class GameManager : Singleton<GameManager>
     const string TypeGLTF = ".gltf";
     const string TypeGLB = ".glb";
 
+    private string _loadFileName = default;
+
     GameScene _currentGameScene = GameScene.Home;
     GameScene _previousGameScene;
 
@@ -132,6 +134,42 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    public IEnumerator DisplaySaveCoroutine()
+    {
+        FileBrowser.SingleClickMode = true;
+
+        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.FilesAndFolders, false, null, null, "Select Folder", "Save");
+
+        if (FileBrowser.Success)
+        {
+            string returnedPath = FileBrowser.Result[0];
+            Debug.Log("Export Path : " + returnedPath);
+
+            var exporter = new GLTFSceneExporter(new[] { _viewerObject.transform }, RetrieveTexturePath);
+            if (FileBrowserHelpers.DirectoryExists(returnedPath))
+            {
+                string folderName = _loadFileName ?? "ExportedObject";
+                string finalExportPath = FileBrowserHelpers.CreateFolderInDirectory(returnedPath, folderName);
+                Debug.Log("Final Export Path for empty filename : " + finalExportPath);
+                exporter.SaveGLTFandBin(finalExportPath, folderName);
+            }
+            else
+            {
+                string saveFileName = FileBrowserHelpers.GetFilename(returnedPath);
+                string folderPath = returnedPath.Substring(0, returnedPath.LastIndexOf(saveFileName));
+                string finalExportPath = FileBrowserHelpers.CreateFolderInDirectory(folderPath, saveFileName);
+                Debug.Log("Final Export Path with given filename : " + finalExportPath);
+                exporter.SaveGLTFandBin(finalExportPath, saveFileName);
+            }
+        }
+
+    }
+
+    private string RetrieveTexturePath(Texture texture)
+    {
+        return texture.name;
+    }
+
     void DisplayLoadingMessage()
     {
         _loadingMessage = UIManager.Instance.CreateMessageWindow();
@@ -147,12 +185,22 @@ public class GameManager : Singleton<GameManager>
         bool isInvalidFileType = false;
         string fileName = FileBrowserHelpers.GetFilename(sourcePath).ToLower();
         if (fileName.EndsWith(TypeOBJ))
+        {
             _viewerObject = new OBJLoader().Load(sourcePath);
-        else if (fileName.EndsWith(TypeGLTF) || fileName.EndsWith(TypeGLB))
+            _loadFileName = fileName.Substring(0, fileName.LastIndexOf(TypeOBJ));
+        }
+        else if (fileName.EndsWith(TypeGLTF))
         {
             gltfImporter.GLTFUri = sourcePath;
             GLTFLoaderTask();
-        }            
+            _loadFileName = fileName.Substring(0, fileName.LastIndexOf(TypeGLTF));
+        }
+        else if (fileName.EndsWith(TypeGLB))
+        {
+            gltfImporter.GLTFUri = sourcePath;
+            GLTFLoaderTask();
+            _loadFileName = fileName.Substring(0, fileName.LastIndexOf(TypeGLB));
+        }
         else
         {
             isInvalidFileType = true;

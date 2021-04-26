@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using SimpleFileBrowser;
 
 
 public class ARViewManager : Singleton<ARViewManager>
@@ -68,4 +69,10 @@ public class ARViewManager : Singleton<ARViewManager>
         }
 
     }
+
+    public void OnExport()
+    {
+        StartCoroutine(GameManager.Instance.DisplaySaveCoroutine());
+    }
+    
 }
