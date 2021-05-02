@@ -111,4 +111,27 @@ public class UIManager : Singleton<UIManager>
         }
 
     }
+
+    public void OnOptionWebAR()
+    {
+        GameObject webARWindow = CreateMessageWindow();
+        if (webARWindow != null)
+        {
+            MessageFields msgFieds = webARWindow.GetComponent<MessageFields>();
+            msgFieds.MessageDetails("Web AR", "Select a glTF/glb file or a Folder/Zip containing a gltf/glb file to generate Web URL\nNote : Selected File/Folder will be uploaded to remote server to generate the URL.", "Browse", "Cancel");
+            Transform browseTrans = webARWindow.transform.Find("Done");
+            if (browseTrans != null)
+            {
+                Button browse = browseTrans.gameObject.GetComponent<Button>();
+                browse.onClick.AddListener(() => { Destroy(webARWindow); StartCoroutine(GameManager.Instance.DisplayWebARLoadCoroutine()); });
+            }
+
+            Transform cancelTrans = webARWindow.transform.Find("Cancel");
+            if (cancelTrans != null)
+            {
+                Button cancel = cancelTrans.gameObject.GetComponent<Button>();
+                cancel.onClick.AddListener(() => Destroy(webARWindow));
+            }
+        }
+    }
 }

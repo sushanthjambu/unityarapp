@@ -27,6 +27,8 @@ public class GameManager : Singleton<GameManager>
     const string TypeGLTF = ".gltf";
     const string TypeGLB = ".glb";
 
+    const long MaxUploadFileSize = 50 * 1023 * 1023;
+
     private string _loadFileName = default;
 
     GameScene _currentGameScene = GameScene.Home;
@@ -131,6 +133,32 @@ public class GameManager : Singleton<GameManager>
             DisplayLoadingMessage();
             Debug.Log(FileBrowser.Result[0]);
             LoadObjfromFile(FileBrowser.Result[0]);
+        }
+    }
+
+    public IEnumerator DisplayWebARLoadCoroutine()
+    {
+        FileBrowser.SingleClickMode = true;
+
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.FilesAndFolders, false, null, null, "Upload File/Folder", "Upload");
+
+        if (FileBrowser.Success)
+        {
+            if (IsValidUpload(FileBrowser.Result[0], out string errorMessage))
+            {
+                string finalUploadPath = FileBrowser.Result[0];
+                if (FileBrowserHelpers.DirectoryExists(FileBrowser.Result[0]))
+                {
+                    //Zip the folder and check the size of zip file. If size is large call DisplayUploadErrorMessage("File size is too large. It must be less than 50MB.")
+                    //Else Set the finalUploadPath to the zip file path.
+                }
+                //UploadFileToServer(finalUplaodPath);
+            }
+            else
+            {
+                if (errorMessage != null)
+                    DisplayUploadErrorMessage(errorMessage);
+            }
         }
     }
 
@@ -260,6 +288,48 @@ public class GameManager : Singleton<GameManager>
         _viewerObject = gltfObject;
     }
 
+    private bool IsValidUpload(string selectedPath, out string errorMessage)
+    {
+        if (FileBrowserHelpers.DirectoryExists(selectedPath))
+        {
+            FileSystemEntry[] allFiles = FileBrowserHelpers.GetEntriesInDirectory(selectedPath);
+            foreach(FileSystemEntry entry in allFiles)
+            {
+                if (!entry.IsDirectory)
+                {
+                    string uploadFileExtension = entry.Extension.ToLower();
+                    if (uploadFileExtension == TypeGLTF || uploadFileExtension == TypeGLB)
+                    {
+                        errorMessage = null;
+                        return true;
+                    }
+                }
+            }
+            errorMessage = "glTF/glb type file not found in selected folder.";
+            return false;
+        }
+        else
+        {
+            string uploadFileName = FileBrowserHelpers.GetFilename(selectedPath).ToLower();
+            if (uploadFileName.EndsWith(TypeGLTF) || uploadFileName.EndsWith(TypeGLB))
+            {
+                if (FileBrowserHelpers.GetFilesize(selectedPath) < MaxUploadFileSize)
+                {
+                    errorMessage = null;
+                    return true;
+                }
+                else
+                {
+                    errorMessage = "File size is too large. It must be less than 50MB.";
+                    return false;
+                }
+            }
+
+            errorMessage = "File selected is not glTF or glb.";
+            return false;            
+        }
+    }
+
     public void DestroyLoadingMessage()
     {
         if (_loadingMessage != null)
@@ -278,6 +348,22 @@ public class GameManager : Singleton<GameManager>
             {
                 Button okButton = okTrans.gameObject.GetComponent<Button>();
                 okButton.onClick.AddListener(() => { Destroy(fileErrorMessage); });
+            }
+        }
+    }
+
+    void DisplayUploadErrorMessage(string errorMessage)
+    {
+        GameObject uploadErrorMessage = UIManager.Instance.CreateMessageWindow();
+        if (uploadErrorMessage != null)
+        {
+            MessageFields msgFields = uploadErrorMessage.GetComponent<MessageFields>();
+            msgFields.MessageDetails("Upload File Error!", errorMessage, "OK");
+            Transform okTrans = uploadErrorMessage.transform.Find("Done");
+            if (okTrans != null)
+            {
+                Button okButton = okTrans.gameObject.GetComponent<Button>();
+                okButton.onClick.AddListener(() => { Destroy(uploadErrorMessage); });
             }
         }
     }
