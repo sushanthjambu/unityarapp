@@ -29,8 +29,6 @@ public class GameManager : Singleton<GameManager>
     const string TypeGLTF = ".gltf";
     const string TypeGLB = ".glb";
 
-    const long MaxUploadFileSize = 50 * 1023 * 1023;
-
     private string _loadFileName = default;
 
     GameScene _currentGameScene = GameScene.Home;
@@ -146,28 +144,14 @@ public class GameManager : Singleton<GameManager>
 
         if (FileBrowser.Success)
         {
-            if (IsValidUpload(FileBrowser.Result[0], out string errorMessage))
+            if (FileUploader.Instance.IsValidUpload(FileBrowser.Result[0], out string errorMessage))
             {
-                if (FileBrowserHelpers.DirectoryExists(FileBrowser.Result[0]))
-                {
-                    string zipPath = Path.Combine(Application.persistentDataPath, "Temp.zip");
-                    ZipUtility.CompressFolderToZip(zipPath, null, FileBrowser.Result[0]);
-                    if (FileBrowserHelpers.GetFilesize(zipPath) < MaxUploadFileSize)
-                        StartCoroutine(UploadFileToServer(zipPath, true));
-                    else
-                    {
-                        DisplayUploadErrorMessage("File size is too large. It must be less than 50MB.");
-                    }                        
-                }
-                else
-                {
-                    StartCoroutine(UploadFileToServer(FileBrowser.Result[0], false));
-                }
+                FileUploader.Instance.UploadToAmazonS3(FileBrowser.Result[0]);
             }
             else
             {
                 if (errorMessage != null)
-                    DisplayUploadErrorMessage(errorMessage);
+                    FileUploader.Instance.DisplayUploadErrorMessage(errorMessage);
             }
         }
     }
@@ -296,136 +280,7 @@ public class GameManager : Singleton<GameManager>
     public void GLTFObjectAssignment(GameObject gltfObject)
     {
         _viewerObject = gltfObject;
-    }
-
-    private IEnumerator UploadFileToServer(string uploadFilePath, bool deleteTempFile)
-    {
-        List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
-        string fileName = FileBrowserHelpers.GetFilename(uploadFilePath);
-        byte[] fileData = FileBrowserHelpers.ReadBytesFromFile(uploadFilePath);
-        formData.Add(new MultipartFormFileSection("Object", fileData, fileName, "application/octet-stream"));
-
-        using(UnityWebRequest uwr = UnityWebRequest.Post("http://192.168.0.103:5555/fileupload", formData))
-        {
-            uwr.SendWebRequest();
-
-            MessageFields uploadMsgFields = DisplayUploadProgressMessage();
-            StartCoroutine(CheckUploadConnection(uwr));
-            while (!uwr.isDone)
-            {
-                string progress = "Progress : " + Mathf.Round(uwr.uploadProgress * 100).ToString() + "%";
-                uploadMsgFields.MessageDetails("Upload Progress ...", progress);
-                if (uwr.isNetworkError || uwr.isHttpError)
-                {
-                    yield break;
-                }                
-                yield return null;
-            }
-
-            if (uwr.result != UnityWebRequest.Result.Success)
-            {
-                DestroyUploadProgressMessage(uploadMsgFields);
-                if (deleteTempFile && FileBrowserHelpers.FileExists(uploadFilePath))
-                {
-                    FileBrowserHelpers.DeleteFile(uploadFilePath);
-                    Debug.Log("Temp File deleted after Error");
-                }
-                DisplayUploadErrorMessage(uwr.error);
-            }
-            else
-            {
-                DestroyUploadProgressMessage(uploadMsgFields);
-                if (deleteTempFile && FileBrowserHelpers.FileExists(uploadFilePath))
-                {
-                    FileBrowserHelpers.DeleteFile(uploadFilePath);
-                    Debug.Log("Temp File deleted");
-                }
-            }
-        }
-    }
-
-    private IEnumerator CheckUploadConnection(UnityWebRequest uwr)
-    {
-        bool IsAborted = false;
-        int counter = 0;
-        float previousProgress, currentProgress, deltaProgress;
-        while (!uwr.isDone && !IsAborted)
-        {
-            previousProgress = uwr.uploadProgress;
-            yield return new WaitForSeconds(1.0f);
-            try
-            {               
-                currentProgress = uwr.uploadProgress;
-            }
-            catch(ArgumentNullException ex)
-            {
-                Debug.Log("[Web Request Object is Disposed] : " + ex.Message);
-                yield break;
-            }                
-            deltaProgress = currentProgress - previousProgress;
-            if (deltaProgress <= 0.0f)
-            {
-                counter++;
-            }
-            else
-            {
-                counter = 0;
-            }
-            if (counter > 10)
-            {
-                Debug.Log("10 Secs elapsed without any progress.");
-                if (uwr != null)
-                {
-                    Debug.Log("Aborted!");
-                    IsAborted = true;
-                    uwr.Abort();
-                }
-                    
-            }                
-        }
-    }
-
-    private bool IsValidUpload(string selectedPath, out string errorMessage)
-    {
-        if (FileBrowserHelpers.DirectoryExists(selectedPath))
-        {
-            FileSystemEntry[] allFiles = FileBrowserHelpers.GetEntriesInDirectory(selectedPath);
-            foreach(FileSystemEntry entry in allFiles)
-            {
-                if (!entry.IsDirectory)
-                {
-                    string uploadFileExtension = entry.Extension.ToLower();
-                    if (uploadFileExtension == TypeGLTF || uploadFileExtension == TypeGLB)
-                    {
-                        errorMessage = null;
-                        return true;
-                    }
-                }
-            }
-            errorMessage = "glTF/glb type file not found in selected folder.";
-            return false;
-        }
-        else
-        {
-            string uploadFileName = FileBrowserHelpers.GetFilename(selectedPath).ToLower();
-            if (uploadFileName.EndsWith(TypeGLTF) || uploadFileName.EndsWith(TypeGLB))
-            {
-                if (FileBrowserHelpers.GetFilesize(selectedPath) < MaxUploadFileSize)
-                {
-                    errorMessage = null;
-                    return true;
-                }
-                else
-                {
-                    errorMessage = "File size is too large. It must be less than 50MB.";
-                    return false;
-                }
-            }
-
-            errorMessage = "File selected is not glTF or glb.";
-            return false;            
-        }
-    }
+    }    
 
     public void DestroyLoadingMessage()
     {
@@ -447,40 +302,6 @@ public class GameManager : Singleton<GameManager>
                 okButton.onClick.AddListener(() => { Destroy(fileErrorMessage); });
             }
         }
-    }
-
-    void DisplayUploadErrorMessage(string errorMessage)
-    {
-        GameObject uploadErrorMessage = UIManager.Instance.CreateMessageWindow();
-        if (uploadErrorMessage != null)
-        {
-            MessageFields msgFields = uploadErrorMessage.GetComponent<MessageFields>();
-            msgFields.MessageDetails("Upload File Error!", errorMessage, "OK");
-            Transform okTrans = uploadErrorMessage.transform.Find("Done");
-            if (okTrans != null)
-            {
-                Button okButton = okTrans.gameObject.GetComponent<Button>();
-                okButton.onClick.AddListener(() => { Destroy(uploadErrorMessage); });
-            }
-        }
-    }
-
-    MessageFields DisplayUploadProgressMessage()
-    {
-        GameObject uploadProgressMessage = UIManager.Instance.CreateMessageWindow();
-        if(uploadProgressMessage != null)
-        {
-            MessageFields msgFields = uploadProgressMessage.GetComponent<MessageFields>();
-            msgFields.MessageDetails("Upload Progress ...", "Progress : ");
-            return msgFields;
-        }
-        return null;
-    }
-
-    void DestroyUploadProgressMessage(MessageFields msgFields)
-    {
-        if (msgFields.gameObject != null)
-            Destroy(msgFields.gameObject);
-    }
+    }    
 
 }
