@@ -15,6 +15,8 @@ public class FileUploader : Singleton<FileUploader>
     const string TypeGLB = ".glb";
 
     const long MaxUploadFileSize = 50 * 1023 * 1023;
+
+    string gltfUrl = default;
     public bool IsValidUpload(string selectedPath, out string errorMessage)
     {
         if (FileBrowserHelpers.DirectoryExists(selectedPath))
@@ -138,7 +140,7 @@ public class FileUploader : Singleton<FileUploader>
             catch (ArgumentNullException ex)
             {
                 Debug.Log("[Web Request Object is Disposed] : " + ex.Message);
-                yield break;
+                break;
             }
             deltaProgress = currentProgress - previousProgress;
             if (deltaProgress <= 0.0f)
@@ -172,7 +174,7 @@ public class FileUploader : Singleton<FileUploader>
         else
         {
             string key = FileBrowserHelpers.GetFilename(dataPath);
-            StartCoroutine(GetPreSignedRequest(key, dataPath, true, (e, m) => { }));
+            StartCoroutine(GetPreSignedRequest(key, dataPath, true, (e, m) => { }));            
         }
     }
 
@@ -190,7 +192,7 @@ public class FileUploader : Singleton<FileUploader>
         if (uploadFileList.Count > 1)
         {
             int numberOfFiles = uploadFileList.Count;
-            int index = 0;
+            float index = 0;
             float uploadPercentage;
             string key, progress;
             MessageFields uploadMsgFields = DisplayUploadProgressMessage();
@@ -204,7 +206,7 @@ public class FileUploader : Singleton<FileUploader>
                 yield return GetPreSignedRequest(key, file, false, (e,m) => { errorOccured = e; errorMsg = m; });
                 if (errorOccured)
                     break;
-                index++;
+                index++;                
             }
 
             DestroyUploadProgressMessage(uploadMsgFields);
@@ -213,14 +215,18 @@ public class FileUploader : Singleton<FileUploader>
             {
                 DisplayUploadErrorMessage(errorMsg);
                 yield break;
-            }            
+            }
+            if (gltfUrl != null)
+            {
+                yield return PushUrlToDatabase(gltfUrl);
+            }
         }
         else if (uploadFileList.Count == 1)
         {
             string filePath = uploadFileList[0];
             string key = filePath.Substring(filePath.LastIndexOf(rootName));
             key = key.Replace("\\", "/");
-            yield return GetPreSignedRequest(key, filePath, true, (e,m) => { });
+            yield return GetPreSignedRequest(key, filePath, true, (e,m) => { });            
         }
         else
             DisplayUploadErrorMessage("Folder is Empty.");
@@ -263,7 +269,8 @@ public class FileUploader : Singleton<FileUploader>
     {
         bool errorOccured = false;
         string errorMsg = null;
-        using (UnityWebRequest uwr = UnityWebRequest.Get("http://192.168.0.103:5555/sign_request?file_name=" + keyName))
+        //Debug.Log("https://jarviewer.herokuapp.com/sign_request?file_name=");
+        using (UnityWebRequest uwr = UnityWebRequest.Get("https://jarviewer.herokuapp.com/sign_request?file_name=" + keyName))
         {
             yield return uwr.SendWebRequest();
             if (uwr.result != UnityWebRequest.Result.Success)
@@ -288,7 +295,7 @@ public class FileUploader : Singleton<FileUploader>
                     ErrorCallback(errorOccured, errorMsg);
                 }
             }
-        }
+        }        
     }
 
     IEnumerator UploadFileToAmazonS3(PresignResponse resp, string filePath, bool isSingleFile, Action<bool, string> ErrorCallback)
@@ -342,6 +349,32 @@ public class FileUploader : Singleton<FileUploader>
             {
                 Debug.Log("File Upload Success! : " + filename);
                 //Debug.Log(uwr.GetResponseHeader("Location"));
+                if (filename.EndsWith(TypeGLTF) || filename.EndsWith(TypeGLB))
+                {
+                    gltfUrl = uwr.GetResponseHeader("Location");
+                    gltfUrl = UnityWebRequest.UnEscapeURL(gltfUrl);
+                    if (isSingleFile)
+                        yield return PushUrlToDatabase(gltfUrl);
+                }                
+            }
+        }
+    }
+
+    IEnumerator PushUrlToDatabase(string uploadUrl)
+    {
+        gltfUrl = null;
+        List<IMultipartFormSection> form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormDataSection("Location", uploadUrl));
+        using (UnityWebRequest uwr = UnityWebRequest.Post("https://jarviewer.herokuapp.com/save_url", form))
+        {
+            yield return uwr.SendWebRequest();
+            if (uwr.result != UnityWebRequest.Result.Success)
+            {
+                DisplayUploadErrorMessage(uwr.downloadHandler.text);
+            }
+            else
+            {
+                DisplayARUrlMessage(uwr.downloadHandler.text);
             }
         }
     }
@@ -358,6 +391,22 @@ public class FileUploader : Singleton<FileUploader>
             {
                 Button okButton = okTrans.gameObject.GetComponent<Button>();
                 okButton.onClick.AddListener(() => { Destroy(uploadErrorMessage); });
+            }
+        }
+    }
+
+    void DisplayARUrlMessage(string url)
+    {
+        GameObject arUrlMessage = UIManager.Instance.CreateMessageWindow();
+        if(arUrlMessage != null)
+        {
+            MessageFields msgFields = arUrlMessage.GetComponent<MessageFields>();
+            msgFields.MessageDetails("WebAR URL", "Copy and Paste the below URL in a Web Browser.\n" + "<link=" + url + "><color=blue><u><i>" + url + "</i></color></u></link>", "OK");
+            Transform okTrans = arUrlMessage.transform.Find("Done");
+            if(okTrans != null)
+            {
+                Button okButton = okTrans.gameObject.GetComponent<Button>();
+                okButton.onClick.AddListener(() => { Destroy(arUrlMessage); });
             }
         }
     }

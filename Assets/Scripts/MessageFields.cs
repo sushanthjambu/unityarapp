@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
 
-public class MessageFields : MonoBehaviour
+public class MessageFields : MonoBehaviour,IPointerClickHandler
 {
     [SerializeField]
     TextMeshProUGUI messageTitle;
@@ -39,4 +40,17 @@ public class MessageFields : MonoBehaviour
             cancelButton.SetActive(false);
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        int linkIndex = TMP_TextUtilities.FindIntersectingLink(messageText, eventData.position, null);
+        if (linkIndex != -1)
+        {
+            TMP_LinkInfo tmpLinkInfo = messageText.textInfo.linkInfo[linkIndex];
+            string webUrl = tmpLinkInfo.GetLinkID();
+            if (webUrl != "")
+            {
+                Application.OpenURL(webUrl);
+            }
+        }
+    }
 }
