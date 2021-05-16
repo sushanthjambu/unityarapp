@@ -12,14 +12,36 @@ using UnityGLTF.Loader;
 
 namespace UnityGLTF
 {
+	/// <summary>
+	/// Handles the import of GLTF object only
+	/// </summary>
 	public class GLTFImporterUpdated : MonoBehaviour
 	{
+		/// <summary>
+		/// Location of the gltf object to be imported
+		/// </summary>
 		public string GLTFUri = null;
-		public bool Multithreaded = true;
-		public bool UseStream = true;
-		public bool AppendStreamingAssets = false;
-		public bool PlayAnimationOnLoad = true;
 
+		/// <summary>
+		/// If true import operation becomes a multithreaded process
+		/// </summary>
+		public bool Multithreaded = true;
+
+		/// <summary>
+		/// Set true if object is on local machine
+		/// </summary>
+		public bool UseStream = true;
+
+		/// <summary>
+		/// If object is in AppendStreaming Assets folder
+		/// </summary>
+		public bool AppendStreamingAssets = false;
+
+		/// <summary>
+		/// Set true if you also want to play the animation of imported gltf object
+		/// </summary>
+		public bool PlayAnimationOnLoad = true;
+		
 		[SerializeField]
 		private bool loadOnStart = false;
 
@@ -62,6 +84,10 @@ namespace UnityGLTF
 			}
 		}
 
+		/// <summary>
+		/// Actual asynce task that loads the gltf object into Unity
+		/// </summary>
+		/// <returns></returns>
 		public async Task Load()
 		{
 			asyncCoroutineHelper = gameObject.GetComponent<AsyncCoroutineHelper>() ?? gameObject.AddComponent<AsyncCoroutineHelper>();
@@ -156,6 +182,11 @@ namespace UnityGLTF
 			}
 		}
 
+		/// <summary>
+		/// Passes the loaded object to Game Manager
+		/// </summary>
+		/// <param name="gltfObject">Loaded gltf object that is to be passed</param>
+		/// <param name="ex">Exception that occured while loading the gltf object</param>
 		private void GLTFObjectToGameManager(GameObject gltfObject, ExceptionDispatchInfo ex)
 		{
 			if (gltfObject != null)
@@ -171,6 +202,10 @@ namespace UnityGLTF
             }
 		}
 
+		/// <summary>
+		/// Displays the  error that occurred while importing the gltf object
+		/// </summary>
+		/// <param name="msg">Error Message to be displyed</param>
 		private void GLTFImportErrorMessage(string msg)
         {
 			GameObject GLTFImportErrorMessage = UIManager.Instance.CreateMessageWindow();

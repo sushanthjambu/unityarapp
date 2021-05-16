@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
+/// <summary>
+/// Attached to the imported object that supports scaling the object with pinch
+/// </summary>
 public class ContentScaler : MonoBehaviour
 {
     private Vector3 originalScale;

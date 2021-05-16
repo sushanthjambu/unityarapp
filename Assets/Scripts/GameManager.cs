@@ -10,14 +10,33 @@ using UnityEngine.SceneManagement;
 using SimpleFileBrowser;
 using Dummiesman;
 using UnityGLTF;
-using Unity.SharpZipLib.Utils;
-
+/// <summary>
+/// Handles the flow of entire app.
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
+    /// <summary>
+    /// GLTF type file importer.
+    /// </summary>
+    /// <value>
+    /// Holds the object of GLTFImpoerterUpdated class
+    /// </value>
     [SerializeField]
     private GLTFImporterUpdated gltfImporter;
 
+    /// <summary>
+    /// Invoked when the  "Viewer" scene is loaded/unloaded
+    /// </summary>
     public event Action OnGameSceneChanged;
+
+    /// <summary>
+    /// Used to determine current active GameScene
+    /// </summary>
+    /// <value>
+    /// Home = Default Scene when app is first opened
+    /// Viewer = Scene loaded after object import, Used to display AR scene
+    /// Editor = Not yet used
+    /// </value>
     public enum GameScene
     {
         Home,
@@ -25,24 +44,50 @@ public class GameManager : Singleton<GameManager>
         Editor
     }
 
+    /// <summary>
+    /// Store constants for file types
+    /// </summary>
     const string TypeOBJ = ".obj";
     const string TypeGLTF = ".gltf";
     const string TypeGLB = ".glb";
 
+    /// <summary>
+    /// Stores the name of loaded file
+    /// </summary>
     private string _loadFileName = default;
 
+    /// <summary>
+    /// Current Game Scene
+    /// </summary>
+    /// <value>
+    /// Holds current Game Scene
+    /// </value>
     GameScene _currentGameScene = GameScene.Home;
+    
+    /// <summary>
+    /// Holds Previous Game Scene
+    /// </summary>
     GameScene _previousGameScene;
 
+    /// <summary>
+    /// Imported Object
+    /// </summary>
     GameObject _viewerObject;
 
+    /// <summary>
+    /// Game Object that display a message while loading the imported object and starting the Viewer Scene
+    /// </summary>
     GameObject _loadingMessage;
 
+    /// <summary>
+    /// Property for _currentGameScene
+    /// </summary>
     public GameScene CurrentGameScene
     {
         get { return _currentGameScene; }
         set { _currentGameScene = value; }
     }
+
 
     private void Start()
     {
@@ -73,6 +118,14 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Unity's Async Op used to Load Viewer Scene
+    /// </summary>
+    /// <remarks>
+    /// Converted to Async op from normal method so that the app can wait(using isDone property of Async Op) and display the loading message while the Viewer Scene is loaded
+    /// </remarks>
+    /// <param name="gameScene">Loads this scene</param>
+    /// <returns>Async Op object that has "isDone" property with which we can wait until the Operation is completed</returns>
     public AsyncOperation LoadLevel(GameScene gameScene)
     {
         if (!SceneManager.GetSceneByName(gameScene.ToString()).isLoaded)
@@ -99,6 +152,10 @@ public class GameManager : Singleton<GameManager>
         return null;
     }
 
+    /// <summary>
+    /// Unloads the given gameScene (Viewer)
+    /// </summary>
+    /// <param name="gameScene">GameScene to be unloaded</param>
     public void UnloadLevel(GameScene gameScene)
     {
         if (SceneManager.GetSceneByName(gameScene.ToString()).isLoaded)
@@ -122,6 +179,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
     
+    /// <summary>
+    /// Opens the File Browser to select the file to be imported
+    /// </summary>
+    /// <returns>IEnumerator object</returns>
     public IEnumerator DisplayLoadCoroutine()
     {
         FileBrowser.SingleClickMode = true;
@@ -136,6 +197,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Opens the File Browser selected file/Folder will be uploaded to AmazonS3
+    /// </summary>
+    /// <returns>IEnumerator object</returns>
     public IEnumerator DisplayWebARLoadCoroutine()
     {
         FileBrowser.SingleClickMode = true;
@@ -156,6 +221,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Displays File Browser to select a file Location to save the exported glTF file
+    /// </summary>
+    /// <returns>IEnumerator Object</returns>
     public IEnumerator DisplaySaveCoroutine()
     {
         FileBrowser.SingleClickMode = true;
@@ -187,11 +256,19 @@ public class GameManager : Singleton<GameManager>
 
     }
 
+    /// <summary>
+    /// Used for creating the object of GLTFSceneExporter class
+    /// </summary>
+    /// <param name="texture">Takes texture as input</param>
+    /// <returns>Name of texture</returns>
     private string RetrieveTexturePath(Texture texture)
     {
         return texture.name;
     }
 
+    /// <summary>
+    /// Displays a pop-up box while selected file is getting imported and the Viewer Scene is loaded
+    /// </summary>
     void DisplayLoadingMessage()
     {
         _loadingMessage = UIManager.Instance.CreateMessageWindow();
@@ -202,6 +279,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Determines the type of file selected by user and imports the selected object
+    /// </summary>
+    /// <param name="sourcePath">Path of object file to be imported</param>
     void LoadObjfromFile(string sourcePath)
     {
         bool isInvalidFileType = false;
@@ -242,6 +323,10 @@ public class GameManager : Singleton<GameManager>
         //}
     }
 
+    /// <summary>
+    /// After the object is imported into Unity it is passed to Viewer scene to display the object in AR
+    /// </summary>
+    /// <returns>IEnumerator Object</returns>
     IEnumerator LoadedObjectToViewer()
     {
         while (_viewerObject == null)
@@ -271,23 +356,36 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// Async Task that loads the selected 3D object into Unity
+    /// </summary>
     async void GLTFLoaderTask()
     {
         if (gltfImporter.GLTFUri != null)
             await gltfImporter.Load();
     }
 
+    /// <summary>
+    /// Assigns the imported object from GLTFImporterUpdated to the global viewer object that is further passed on to Viewer Scene
+    /// </summary>
+    /// <param name="gltfObject"></param>
     public void GLTFObjectAssignment(GameObject gltfObject)
     {
         _viewerObject = gltfObject;
     }    
 
+    /// <summary>
+    /// Destroys the pop-up message displayed after the Viewer Scene is loaded
+    /// </summary>
     public void DestroyLoadingMessage()
     {
         if (_loadingMessage != null)
             Destroy(_loadingMessage);
     }
 
+    /// <summary>
+    /// Error message shown as pop-up if the selected file type is not supported for importing
+    /// </summary>
     void DisplayFileErrorMessage()
     {
         GameObject fileErrorMessage = UIManager.Instance.CreateMessageWindow();

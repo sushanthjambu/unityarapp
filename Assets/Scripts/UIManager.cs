@@ -3,27 +3,57 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Handles the UI of app
+/// </summary>
 public class UIManager : Singleton<UIManager>
 {
+    /// <summary>
+    /// Home screen UI Object
+    /// </summary>
     [SerializeField] GameObject _homeScreen;
 
+    /// <summary>
+    /// Slide screen used for options menu on top left
+    /// </summary>
     [SerializeField] GameObject _optionsScreen;
 
+    /// <summary>
+    /// Pop-up message Prefab(MessageWindow)
+    /// </summary>
     [SerializeField] GameObject _messageWindow;
 
+    /// <summary>
+    /// Rect Transform of Slide Screen/options Menu
+    /// </summary>
     RectTransform _optionsRectTransform;
 
+    /// <summary>
+    /// Tells if the slide screen is opened
+    /// </summary>
     bool _isOptionsOpen = false;
 
+    /// <summary>
+    /// Property of _isOptionsOpen
+    /// </summary>
     public bool IsOptionsOpen
     {
         get { return _isOptionsOpen; }
     }
 
+    /// <summary>
+    /// Position of Options Screen when closed. Initialized in Start()
+    /// </summary>
     Vector2 _closedPosition = Vector2.zero;
 
+    /// <summary>
+    /// Position of Options Screen when open. Initialized in Start()
+    /// </summary>
     Vector2 _openPosition = Vector2.zero;
 
+    /// <summary>
+    /// Time taken for Options screen to be opened completely
+    /// </summary>
     float _slideDuration = 0.5f;
     void Start()
     {
@@ -34,6 +64,9 @@ public class UIManager : Singleton<UIManager>
         _openPosition.x += _optionsRectTransform.rect.width;
     }
 
+    /// <summary>
+    /// If User clicks the Options Button on the top left of Home Screen
+    /// </summary>
     public void OnOptionsClick()
     {
         if (_isOptionsOpen)
@@ -48,6 +81,11 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
+    /// <summary>
+    /// Moves the Options Screen to the given Vector2 Position. Used to slide the options screen
+    /// </summary>
+    /// <param name="moveToPosition">Position to which the screen is to be moved</param>
+    /// <returns></returns>
     IEnumerator LerpOptionsMenu(Vector2 moveToPosition)
     {
         float timeElapsed = 0;
@@ -64,17 +102,27 @@ public class UIManager : Singleton<UIManager>
         _isOptionsOpen = !_isOptionsOpen;
     }
 
+    /// <summary>
+    /// Triggered when the Viewer Scene is loaded, turns off the home screen UI and vice-versa
+    /// </summary>
     void ToggleHomeScreen()
     {
         _homeScreen.SetActive(GameManager.Instance.CurrentGameScene == GameManager.GameScene.Home);
         _optionsScreen.SetActive(GameManager.Instance.CurrentGameScene == GameManager.GameScene.Home);
     }
 
+    /// <summary>
+    /// If User clicks the Browse button on the center
+    /// </summary>
     public void onBrowse()
     {
         StartCoroutine(GameManager.Instance.DisplayLoadCoroutine());
     }
 
+    /// <summary>
+    /// Created a Pup-up message window object in the scene using the _messageWindow prefab
+    /// </summary>
+    /// <returns>The created message window</returns>
     public GameObject CreateMessageWindow()
     {
         GameObject dynamicCanvas = GameObject.Find("DynamicCanvas");
@@ -83,11 +131,17 @@ public class UIManager : Singleton<UIManager>
         return null;
     }
 
+    /// <summary>
+    /// If user clicks the Exit button in the Options screen
+    /// </summary>
     public void OnOptionExit()
     {
         Application.Quit();
     }
 
+    /// <summary>
+    /// If user clicks the Viewer button in the Options screen
+    /// </summary>
     public void OnOptionViewer()
     {
         GameObject viewerWindow = CreateMessageWindow();
@@ -112,6 +166,9 @@ public class UIManager : Singleton<UIManager>
 
     }
 
+    /// <summary>
+    /// If user clicks the WebAR button in the Options screen
+    /// </summary>
     public void OnOptionWebAR()
     {
         GameObject webARWindow = CreateMessageWindow();

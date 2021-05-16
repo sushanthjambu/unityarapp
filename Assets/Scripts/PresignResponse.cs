@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Used to serialize the Json Response of Presign Request from Amazon S3  
+/// </summary>
 [Serializable]
 public class PresignResponse
 {
