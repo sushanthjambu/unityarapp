@@ -9,7 +9,7 @@
 There are two main features that this app implements
 1. Imports the local 3D files of type .obj, .gltf and .glb and displays in AR View.
 	- After placing the object on a plane you can also export the 3D object to .gltf format. However the exported object may not have all the properties of the original object.
-2. WebAR - Genearates a Web link which can be shared. So that anyone can view the 3D object in web browser for which you have generated the web link.
+2. WebAR - Generates a Web link which can be shared. So that anyone can view the 3D object in web browser for which you have generated the web link.
 
 ## Installation
 - You can find the .apk file in the releases section that can be installed on your Android phone. But the WebAR feature will not work this way, read the WebAR section below to know more.
@@ -49,6 +49,6 @@ There are two main features that this app implements
 - **After you implement the Server give the public url of server in FileUploader.cs script.**
 
 ## Credits
-Unity Simple File Browser - https://github.com/yasirkula/UnitySimpleFileBrowser
-Runtime Obj Importer - https://assetstore.unity.com/packages/tools/modeling/runtime-obj-importer-49547
-Unity GLTF - https://github.com/KhronosGroup/UnityGLTF
+- Unity Simple File Browser - https://github.com/yasirkula/UnitySimpleFileBrowser
+- Runtime Obj Importer - https://assetstore.unity.com/packages/tools/modeling/runtime-obj-importer-49547
+- Unity GLTF - https://github.com/KhronosGroup/UnityGLTF
