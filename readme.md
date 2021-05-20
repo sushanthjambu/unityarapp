@@ -41,12 +41,12 @@ There are two main features that this app implements
 4. So the server gets the uploaded 3D file from Amazon S3 while rendering html in browser.
 #### Steps to upload the file/folder successfully
 1. User can select either a .glb file or .gltf file. If the .gltf has supporting files like .bin or texture images in a folder, then user must upload the folder containing all the files.
-2. However they cannot exceed 50MB limit. You may change this in FileUploader.cs to suit your needs.
+2. However they cannot exceed 50MB limit. You may change this in [FileUploader.cs](https://github.com/sushanthjambu/unityarapp/blob/9ea15d3589effde17c57859ad09079e319bb9472/Assets/Scripts/FileUploader.cs#L31) to suit your needs.
 3. To select a folder, open the folder you want to upload and without selecting any file in that folder just click on "Upload" button. Make sure the folder name is present in the Adreess bar before you upload.
 #### Steps to implement the Server
 - I have an example Server implemented with Flask-python. Below is the repo
-
-- **After you implement the Server give the public url of server in FileUploader.cs script.**
+	- https://github.com/sushanthjambu/jarviewer-flask
+- **After you implement the Server give the public url of server in [FileUploader.cs](https://github.com/sushanthjambu/unityarapp/blob/9ea15d3589effde17c57859ad09079e319bb9472/Assets/Scripts/FileUploader.cs#L19) script.**
 
 ## Credits
 - Unity Simple File Browser - https://github.com/yasirkula/UnitySimpleFileBrowser
