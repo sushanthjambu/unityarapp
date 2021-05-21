@@ -62,9 +62,9 @@ There are two main features that this app implements
 2. However the cumulative size cannot exceed 50MB limit. You may change this in [FileUploader.cs](Assets/Scripts/FileUploader.cs#L31) to suit your needs.
 3. To select a folder, open the folder you want to upload and without selecting any file in that folder just click on "Upload" button. Make sure the folder name is present in the Address bar before you upload.
 <p align="center">
-<table align="center" width ="25%">
+<table align="center">
 	<tr>
-		<td><img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import" </td>
+		<td width="25%" height="50%"><img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import" </td>
 	</tr>
 	<tr>
 		<td>1. Open the folder and check if the name of folder to be uploaded is present in address bar</td>
