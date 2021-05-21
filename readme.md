@@ -31,6 +31,7 @@ There are two main features that this app implements
 
 ## AR Viewer
 - You may click the "Browse" button on home screen.Also you can open the Options Panel by clicking the button on top left and then click on AR Viewer button.
+
 	<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse%20Button.png" alt="Browse button" width="20%" height="50%">
 - After that select the appropriate 3D File to view in AR.
 - Sometimes the importer may throw an error or the textures are not imported properly. The app just uses external packages for importing hence nothing can be done in these cases.    
