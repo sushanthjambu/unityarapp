@@ -7,13 +7,13 @@
 * Generate Web links that can display the selected 3D model (only .gltf and .glb files are supported for this feature) as an AR object in Web Browser. These links can be shared with anyone so that they can view the AR content on their browser.
 	> **Note** : If the browser or the device doesn't support AR then only the 3D Model is dispayed.
 <p align="center">
-<img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/WebAR%20Link.png" alt="WebAR URL" width="20%" height="50%">
+<img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/WebAR%20Link.png" alt="WebAR URL" width="25%" height="50%">
 </p>
 
 * Export the imported models to a location on your android device as .gltf model. So you can first import a .obj object view in AR and then export it to a location on the device as .gltf model.
 	> **Note** : The exported model may not contain all the textures/features of the imported model. The app is limited by the libraries/packages it uses.
 <p align="center">
-<img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Export%20Button.png" alt="Export" width="20%" height="50%">
+<img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Export%20Button.png" alt="Export" width="25%" height="50%">
 </p>
 
 ## Features
@@ -41,7 +41,7 @@ There are two main features that this app implements
 ## AR Viewer
 - You may click the "Browse" button on home screen.Also you can open the Options Panel by clicking the button on top left and then click on AR Viewer button.
 	<p align="center">
-	<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse.png" alt="Browse button" width="20%" height="50%">
+	<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse.png" alt="Browse button" width="25%" height="50%">
 	</p>
 - After that select the appropriate 3D File to view in AR.
 - Sometimes the importer may throw an error or the textures are not imported properly. The app just uses external packages for importing hence nothing can be done in these cases.    
@@ -62,17 +62,9 @@ There are two main features that this app implements
 2. However the cumulative size cannot exceed 50MB limit. You may change this in [FileUploader.cs](Assets/Scripts/FileUploader.cs#L31) to suit your needs.
 3. To select a folder, open the folder you want to upload and without selecting any file in that folder just click on "Upload" button. Make sure the folder name is present in the Address bar before you upload.
 <p align="center">
-<table align="center">
-	<tr>
-		<td width="25%" height="50%"><img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import"></td>
-	</tr>
-	<tr>
-		<td>1. Open the folder and check if the name of folder to be uploaded is present in address bar</td>
-	</tr>
-	<tr>
-		<td>2. Click on Upload after checking folder name</td>
-	</tr>
-</table>
+<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import" width="25%" height="50%">
+	- Open the folder you wish to upload and check if the folder's name is correct in the address bar.
+	- Next Click on Upload, the last name present on Address bar is the folder that will be uploaded.
 </p>
 
 #### Steps to implement the Server
