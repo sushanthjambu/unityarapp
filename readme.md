@@ -2,10 +2,10 @@
 * An android app made with Unity that can import 3D models (.obj, .gltf, .glb) present on the device and display them as an AR object after tapping on the detected ground plane.
 * Generate Web links that can display the selected 3D model (only .gltf and .glb files are supported for this feature) as an AR object in Web Browser. These links can be shared with anyone so that they can view the AR content on their browser.
 	> **Note** : If the browser or the device doesn't support AR then only the 3D Model is dispayed.
-	![WebAR URL](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/WebAR%20Link.png)
+<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/WebAR%20Link.png" alt="WebAR URL" width="20%" height="50%">
 * Export the imported models to a location on your android device as .gltf model. So you can first import a .obj object view in AR and then export it to a location on the device as .gltf model.
 	> **Note** : The exported model may not contain all the textures/features of the imported model. The app is limited by the libraries/packages it uses.
-	![Export](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Export%20Button.png)
+<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Export%20Button.png" alt="Export" width="20%" height="50%">
 
 ## Features
 There are two main features that this app implements
@@ -31,7 +31,7 @@ There are two main features that this app implements
 
 ## AR Viewer
 - You may click the "Browse" button on home screen.Also you can open the Options Panel by clicking the button on top left and then click on AR Viewer button.
-	![Browse button](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse%20Button.png)
+	<img src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse%20Button.png" alt="Browse button" width="20%" height="50%">
 - After that select the appropriate 3D File to view in AR.
 - Sometimes the importer may throw an error or the textures are not imported properly. The app just uses external packages for importing hence nothing can be done in these cases.    
 
