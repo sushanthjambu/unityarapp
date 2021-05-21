@@ -121,7 +121,7 @@ public class FileUploader : Singleton<FileUploader>
         byte[] fileData = FileBrowserHelpers.ReadBytesFromFile(uploadFilePath);
         formData.Add(new MultipartFormFileSection("Object", fileData, fileName, "application/octet-stream"));
 
-        using (UnityWebRequest uwr = UnityWebRequest.Post("http://192.168.0.103:5555/fileupload", formData))
+        using (UnityWebRequest uwr = UnityWebRequest.Post(amazonS3ServerBackend + "/fileupload", formData))
         {
             uwr.SendWebRequest();
 

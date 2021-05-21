@@ -92,6 +92,7 @@ public class GameManager : Singleton<GameManager>
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     private void Update()

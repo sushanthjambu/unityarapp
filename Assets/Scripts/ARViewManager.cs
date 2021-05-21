@@ -94,7 +94,8 @@ public class ARViewManager : Singleton<ARViewManager>
                 ARAnchor anchor = arAnchorManager.AttachAnchor(hitPlane, hitPose);
                 Debug.Log("Anchor is attached to plane : " + anchor.name);
                 anchor.transform.SetParent(instantiatedObject.transform);
-            }            
+            }
+            StopPlaneDetection();
         }
 
     }
@@ -105,6 +106,15 @@ public class ARViewManager : Singleton<ARViewManager>
     public void OnExport()
     {
         StartCoroutine(GameManager.Instance.DisplaySaveCoroutine());
+    }
+
+    void StopPlaneDetection()
+    {
+        arPlaneManager.enabled = false;
+        foreach(var plane in arPlaneManager.trackables)
+        {
+            plane.gameObject.SetActive(false);
+        }        
     }
     
 }
