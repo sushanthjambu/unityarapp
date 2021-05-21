@@ -64,7 +64,7 @@ There are two main features that this app implements
 <p align="center">
 <table align="center">
 	<tr>
-		<td width="25%" height="50%"><img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import" </td>
+		<td width="25%" height="50%"><img align="center" src="https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Folder%20Upload.jpg" alt="Obj Import"></td>
 	</tr>
 	<tr>
 		<td>1. Open the folder and check if the name of folder to be uploaded is present in address bar</td>
