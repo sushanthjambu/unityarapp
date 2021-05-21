@@ -108,6 +108,9 @@ public class ARViewManager : Singleton<ARViewManager>
         StartCoroutine(GameManager.Instance.DisplaySaveCoroutine());
     }
 
+    /// <summary>
+    /// Stops Plane Detection after Object Placement
+    /// </summary>
     void StopPlaneDetection()
     {
         arPlaneManager.enabled = false;
