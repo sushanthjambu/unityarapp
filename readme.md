@@ -2,8 +2,10 @@
 * An android app made with Unity that can import 3D models (.obj, .gltf, .glb) present on the device and display them as an AR object after tapping on the detected ground plane.
 * Generate Web links that can display the selected 3D model (only .gltf and .glb files are supported for this feature) as an AR object in Web Browser. These links can be shared with anyone so that they can view the AR content on their browser.
 	> **Note** : If the browser or the device doesn't support AR then only the 3D Model is dispayed.
+	![WebAR URL](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/WebAR%20Link.png)
 * Export the imported models to a location on your android device as .gltf model. So you can first import a .obj object view in AR and then export it to a location on the device as .gltf model.
 	> **Note** : The exported model may not contain all the textures/features of the imported model. The app is limited by the libraries/packages it uses.
+	![Export](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Export%20Button.png)
 
 ## Features
 There are two main features that this app implements
@@ -29,6 +31,7 @@ There are two main features that this app implements
 
 ## AR Viewer
 - You may click the "Browse" button on home screen.Also you can open the Options Panel by clicking the button on top left and then click on AR Viewer button.
+	![Browse button](https://github.com/sushanthjambu/readme-images/blob/main/unityarapp/Browse%20Button.png)
 - After that select the appropriate 3D File to view in AR.
 - Sometimes the importer may throw an error or the textures are not imported properly. The app just uses external packages for importing hence nothing can be done in these cases.    
 
@@ -46,7 +49,7 @@ There are two main features that this app implements
 #### Steps to implement the Server
 - I have an example Server implemented with Flask-python. Below is the repo
 	- https://github.com/sushanthjambu/jarviewer-flask
-- **After you implement the Server give the public url of server in [FileUploader.cs](https://github.com/sushanthjambu/unityarapp/blob/9ea15d3589effde17c57859ad09079e319bb9472/Assets/Scripts/FileUploader.cs#L19) script.**
+- **After you implement the Server give the public url of server in [FileUploader.cs](Assets/Scripts/FileUploader.cs#L19) script.**
 
 ## Credits
 - Unity Simple File Browser - https://github.com/yasirkula/UnitySimpleFileBrowser
